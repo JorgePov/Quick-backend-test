@@ -1,0 +1,4 @@
+venv
+database/*
+!database/.gitignore
+__pycache__

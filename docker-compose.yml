@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:13-alpine
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+            POSTGRES_DB: destacame
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./database:/var/lib/postgresql/data/
+    ports:
+      - 5432:5432
+
+
