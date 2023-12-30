@@ -1,4 +1,8 @@
 venv
 database/*
 !database/.gitignore
+export/*
+!export/.gitignore
+import/*
+!import/.gitignore
 __pycache__

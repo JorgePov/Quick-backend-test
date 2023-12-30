@@ -1,14 +1,16 @@
-from rest_framework import status
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth import authenticate
 from .serializers import ClientResgisterSerializer, ClientSerializer
+from clients.api.v1.task import generate_client_csv_export
+from clients.models import Client
+from django.contrib.auth import authenticate
 from django.shortcuts import get_object_or_404
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from clients.models import Client
+from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+import threading
 
 class LoginView(APIView):
 
@@ -88,6 +90,7 @@ class ClientView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 class ClientByIdView(APIView):
+
     permission_classes = [IsAuthenticated]
 
     def get_object(self, pk):
@@ -123,5 +126,17 @@ class ClientByIdView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Client.DoesNotExist:
             return Response({"error": "Client not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class ExportClientsCSV(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            thread = threading.Thread(target=generate_client_csv_export)
+            thread.start()
+            return Response({'message': 'La generación de CSV está en progreso. Revisar la carpeta export'})
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
