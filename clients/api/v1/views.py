@@ -26,6 +26,7 @@ class LoginView(APIView):
             return Response({
                 'document': user.document,
                 'email': user.email,
+                'id': user.id,
                 'name': user.get_full_name(), 
                 'refresh_token': refresh_token,
                 'token': access_token,
@@ -53,7 +54,7 @@ class ClientView(APIView):
 
     def get(self, request):
         try:
-            clients = Client.objects.filter(isActive=True)
+            clients = Client.objects.filter(is_active=True)
             serializer = ClientSerializer(clients, many=True)
             return Response(serializer.data)
         except Client.DoesNotExist:
@@ -92,7 +93,8 @@ class ClientByIdView(APIView):
     def delete(self, request, pk):
         try:
             client = self.get_object(pk)
-            client.delete()
+            client.is_deleted = True
+            client.save()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Client.DoesNotExist:
             return Response({"error": "Client not found"}, status=status.HTTP_404_NOT_FOUND)
