@@ -10,6 +10,20 @@ from rest_framework.permissions import IsAuthenticated
 class ProductView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_description="Obtiene todos los productos.",
+        responses={200: openapi.Schema(
+            type=openapi.TYPE_ARRAY,
+            items=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                    'name': openapi.Schema(type=openapi.TYPE_STRING),
+                    'description': openapi.Schema(type=openapi.TYPE_STRING),
+                }
+            )
+        ), 404: 'Product not found'}
+    )
     def get(self, request):
         try:
             products = Product.objects.all()
@@ -21,9 +35,16 @@ class ProductView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @swagger_auto_schema(
-        operation_description="Creacion de neuvo producto.",
-        request_body=ProductSerializer,
-        responses={status.HTTP_201_CREATED: openapi.Response('')},
+        operation_description="Crea un producto.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'name': openapi.Schema(type=openapi.TYPE_STRING),
+                'description': openapi.Schema(type=openapi.TYPE_STRING),
+            },
+            required=['name', 'description']
+        ),
+        responses={status.HTTP_201_CREATED: '', status.HTTP_400_BAD_REQUEST: ''}
     )
     def post(self, request):
         try:
@@ -42,6 +63,17 @@ class ProductByIdView(APIView):
     def get_object(self, pk):
         return Product.objects.get(pk=pk)
 
+    @swagger_auto_schema(
+        operation_description="Obtiene un producto por id.",
+        responses={200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'name': openapi.Schema(type=openapi.TYPE_STRING),
+                'description': openapi.Schema(type=openapi.TYPE_STRING),
+            }
+        ), 404: 'Product not found'}
+    )
     def get(self, request, pk):
         try:
             product = self.get_object(pk)
@@ -52,6 +84,28 @@ class ProductByIdView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    @swagger_auto_schema(
+        operation_description="Actualiza un producto.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'name': openapi.Schema(type=openapi.TYPE_STRING),
+                'description': openapi.Schema(type=openapi.TYPE_STRING),
+            },
+            required=['name', 'description']
+        ),
+        responses={
+            200: openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                    'name': openapi.Schema(type=openapi.TYPE_STRING),
+                    'description': openapi.Schema(type=openapi.TYPE_STRING),
+                }), 
+            400: '', 
+            404: 'Product not found'
+        }
+    )
     def patch(self, request, pk):
         try:
             product = self.get_object(pk)
@@ -65,6 +119,10 @@ class ProductByIdView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    @swagger_auto_schema(
+        operation_description="Elimina una producto por id.",
+        responses={204: '', 404: 'Product not found'}
+    )
     def delete(self, request, pk):
         try:
             product = self.get_object(pk)
