@@ -12,6 +12,31 @@ from rest_framework.permissions import IsAuthenticated
 
 class LoginView(APIView):
 
+    @swagger_auto_schema(
+        operation_description="Servicio encargado de autenticar un usuario.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'email': openapi.Schema(type=openapi.TYPE_STRING, description='Email del usuario'),
+                'password': openapi.Schema(type=openapi.TYPE_STRING, description='Contraseña del usuario'),
+            },
+            required=['email', 'password'],
+        ),
+        responses={
+            200: openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'document': openapi.Schema(type=openapi.TYPE_INTEGER, description='Documento del usuario'),
+                    'email': openapi.Schema(type=openapi.TYPE_STRING, description='Email del usuario'),
+                    'id': openapi.Schema(type=openapi.TYPE_INTEGER, description='Identificacion interna del usuario'),
+                    'name': openapi.Schema(type=openapi.TYPE_STRING, description='Nombre completo del usuario'),
+                    'refresh_token': openapi.Schema(type=openapi.TYPE_STRING, description='Token de actualización'),
+                    'token': openapi.Schema(type=openapi.TYPE_STRING, description='Token de acceso'),
+                },
+            ),
+            401: 'Credenciales inválidas',
+        },
+    )
     def post(self, request, *args, **kwargs):
         email = request.data.get("email")
         password = request.data.get("password")
