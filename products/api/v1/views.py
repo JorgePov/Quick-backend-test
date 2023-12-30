@@ -5,8 +5,11 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 
 class ProductView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
         try:
             products = Product.objects.all()
@@ -33,6 +36,9 @@ class ProductView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class ProductByIdView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
     def get_object(self, pk):
         return Product.objects.get(pk=pk)
 

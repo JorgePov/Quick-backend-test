@@ -5,8 +5,12 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 
 class BillView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
         try:
             bills = Bill.objects.all()
@@ -33,6 +37,9 @@ class BillView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class BillByIdView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
     def get_object(self, pk):
         return Bill.objects.get(pk=pk)
 
