@@ -1,5 +1,7 @@
+import csv
+import threading
 from .serializers import ClientResgisterSerializer, ClientSerializer
-from clients.api.v1.task import generate_client_csv_export
+from clients.api.v1.task import generate_client_csv_export, bulk_client_csv_import
 from clients.models import Client
 from django.contrib.auth import authenticate
 from django.shortcuts import get_object_or_404
@@ -10,7 +12,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-import threading
 
 class LoginView(APIView):
 
@@ -140,3 +141,25 @@ class ExportClientsCSV(APIView):
             return Response({'message': 'La generación de CSV está en progreso. Revisar la carpeta export'})
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class BulkImportClients(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            csv_file = request.FILES.get('csv_file')
+            if not csv_file or not csv_file.name.endswith('.csv'):
+                return Response({'error': 'Se requiere un archivo CSV válido.'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            file_path = 'import/clients_import.csv'
+            with open(file_path, 'wb') as destination:
+                for chunk in csv_file.chunks():                        
+                    destination.write(chunk)
+
+            thread = threading.Thread(target=bulk_client_csv_import)
+            thread.start() 
+            return Response({'message': 'La carga masiva está en proceso. Revise más tarde.'}, status=status.HTTP_202_ACCEPTED)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
