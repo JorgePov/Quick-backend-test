@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'clients',
     'bills',
+    'products',
 ]
 
 MIDDLEWARE = [
