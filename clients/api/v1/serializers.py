@@ -18,4 +18,4 @@ class ClientResgisterSerializer(serializers.ModelSerializer):
 class ClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
-        fields = ('email', 'first_name', 'last_name', 'document')
+        fields = ('id','email', 'first_name', 'last_name', 'document')

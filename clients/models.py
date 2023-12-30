@@ -16,6 +16,9 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault('is_superuser', True)
 
         return self.create_user(email, password, **extra_fields)
+    
+    def get_queryset(self):
+        return super().get_queryset().filter(is_deleted=False)
 
 class Client(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
@@ -24,6 +27,7 @@ class Client(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=30, blank=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    is_deleted = models.BooleanField(default=False)
 
     objects = CustomUserManager()
    

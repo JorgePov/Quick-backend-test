@@ -12,6 +12,31 @@ from rest_framework.permissions import IsAuthenticated
 
 class LoginView(APIView):
 
+    @swagger_auto_schema(
+        operation_description="Servicio encargado de autenticar un usuario.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'email': openapi.Schema(type=openapi.TYPE_STRING, description='Email del usuario'),
+                'password': openapi.Schema(type=openapi.TYPE_STRING, description='Contraseña del usuario'),
+            },
+            required=['email', 'password'],
+        ),
+        responses={
+            200: openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'document': openapi.Schema(type=openapi.TYPE_INTEGER, description='Documento del usuario'),
+                    'email': openapi.Schema(type=openapi.TYPE_STRING, description='Email del usuario'),
+                    'id': openapi.Schema(type=openapi.TYPE_INTEGER, description='Identificacion interna del usuario'),
+                    'name': openapi.Schema(type=openapi.TYPE_STRING, description='Nombre completo del usuario'),
+                    'refresh_token': openapi.Schema(type=openapi.TYPE_STRING, description='Token de actualización'),
+                    'token': openapi.Schema(type=openapi.TYPE_STRING, description='Token de acceso'),
+                },
+            ),
+            401: 'Credenciales inválidas',
+        },
+    )
     def post(self, request, *args, **kwargs):
         email = request.data.get("email")
         password = request.data.get("password")
@@ -26,6 +51,7 @@ class LoginView(APIView):
             return Response({
                 'document': user.document,
                 'email': user.email,
+                'id': user.id,
                 'name': user.get_full_name(), 
                 'refresh_token': refresh_token,
                 'token': access_token,
@@ -53,7 +79,7 @@ class ClientView(APIView):
 
     def get(self, request):
         try:
-            clients = Client.objects.filter(isActive=True)
+            clients = Client.objects.filter(is_active=True)
             serializer = ClientSerializer(clients, many=True)
             return Response(serializer.data)
         except Client.DoesNotExist:
@@ -92,7 +118,8 @@ class ClientByIdView(APIView):
     def delete(self, request, pk):
         try:
             client = self.get_object(pk)
-            client.delete()
+            client.is_deleted = True
+            client.save()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Client.DoesNotExist:
             return Response({"error": "Client not found"}, status=status.HTTP_404_NOT_FOUND)
