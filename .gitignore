@@ -3,6 +3,6 @@ database/*
 !database/.gitignore
 export/*
 !export/.gitignore
-import/*
-!import/.gitignore
+import/*.txt
 __pycache__
+.DS_Store
