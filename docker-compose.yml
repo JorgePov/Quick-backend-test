@@ -1,9 +1,12 @@
 version: "3.9"
 
+networks:
+  quick:
+
 services:
   db:
     image: postgres:13-alpine
-    container_name: postgres
+    container_name: postgres_quick
     restart: unless-stopped
     environment:
             POSTGRES_DB: destacame
@@ -13,5 +16,23 @@ services:
       - ./database:/var/lib/postgresql/data/
     ports:
       - 5432:5432
+    networks:
+      - quick
+  api:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: backend_quick
+    volumes:
+      - .:/api
+    working_dir: /api
+    ports:
+      - 8000:8000
+    expose:
+      - 8000
+    depends_on:
+      - db
+    networks:
+      - quick
 
 
