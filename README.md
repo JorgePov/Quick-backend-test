@@ -7,6 +7,8 @@
 
 Se solicito el desarrollo de un backend basados en un base de datos relacional compartida.
 
+Se dejo un archivo de ejemplo para la importacion en bulk en la carpeta import y el documento generado por los clientes se agregara en la carpeta export
+
 ## Requerimientos
 
 **1:**  Crear un CRUD de cada una de las tablas
